@@ -57,3 +57,12 @@ Opnieuw beginnen: tik **7 keer** op de titel op het startscherm.
 ## Het gedicht
 
 Zie `src/rijm.txt`. Op het scherm staat de naam als **Manu**; in de stem klinkt die als **Mannoe**.
+
+## Piet-stem (ElevenLabs, ook voor `/spel/`)
+
+Piet spreekt via ElevenLabs. Houd in het Pieten spel (`/spel/`) dezelfde stem aan:
+
+- **voice_id:** `SpRzmdV0YTgetjcWNbpH`
+- **stem:** Dex – Energetic Dutch Commercial, TVHost
+- **model_id:** `eleven_v4`
+- **Gesproken naam:** Mannoe (in het script; eventueel IPA `/mɑˈnu/`). Op het scherm blijft de naam **Manu**.
