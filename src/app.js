@@ -6,7 +6,7 @@
   const $$ = (sel, el) => Array.from((el || document).querySelectorAll(sel));
 
   const PIET_TXT = {
-    intro: "Hoi Mannoe! Mag jij een foto maken van de ruimte waar je nu bent?",
+    intro: "Hoi " + C.playerFirst + "! Mag jij een foto maken van de ruimte waar je nu bent?",
     cold: [
       "Brrr, ijskoud! Hier ligt alleen een sok.",
       "Nee hoor, koud als ijs! Hier is de zak vast niet.",
@@ -22,7 +22,7 @@
     code: "Op de zak hangt een briefje met een geheime code. Tik de code in als je de zak hebt gevonden!",
     wrong: "Helaas, dat is niet de juiste code. Kijk nog eens op het briefje!",
     found: "Hoera! Je hebt de zak gevonden!",
-    oorkonde: "Gefeliciteerd, Mannoe! Jij bent nu Officiële Hulppiet!",
+    oorkonde: "Gefeliciteerd, " + C.playerFirst + "! Jij bent nu Officiële Hulppiet!",
   };
 
   const LYRICS = (window.LIED_CUES && window.LIED_CUES.cues) || [

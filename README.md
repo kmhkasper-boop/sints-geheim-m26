@@ -40,7 +40,7 @@ Opnieuw beginnen: tik **7 keer** op de titel op het startscherm.
 ## Hoe het loopt
 
 1. Tik op **Start!** (nodig voor geluid op iPhone/iPad).
-2. Filmpje van Sinterklaas met een kort gedicht (traditie + een bericht voor Mannoe). **Nog een keer** of **Verder**.
+2. Filmpje van Sinterklaas met een kort gedicht (traditie + een bericht voor Manu). **Nog een keer** of **Verder**.
 3. Piet vraagt om een foto van de ruimte. Drie keer zegt hij «koud», met een thermometer. Ondertussen kan Manu **Strooi!** doen: virtuele pepernoten (met teller).
 4. Daarna vraagt Piet om een foto van de **koelkast**. Op die foto vliegt een polaroid van «de plek» met een magneetje. Tik erop voor een grote weergave.
 5. Op de zak hangt het briefje met de code. Die tikt hij in, dan **Gevonden!**
@@ -56,4 +56,4 @@ Opnieuw beginnen: tik **7 keer** op de titel op het startscherm.
 
 ## Het gedicht
 
-Zie `src/rijm.txt`. In de stem staat de naam als **Mannoe**.
+Zie `src/rijm.txt`. Op het scherm staat de naam als **Manu**; in de stem klinkt die als **Mannoe**.

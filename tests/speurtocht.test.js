@@ -109,6 +109,17 @@ const LAYOUTS = [
     await verderNaSint(pg);
     const bubble = await pg.locator("#piet-bubble").textContent();
     ok(/foto/i.test(bubble), "Piet vraagt om een foto: " + bubble);
+    ok(/\bManu\b/.test(bubble) && !/Mannoe/.test(bubble), "bubbel schrijft Manu, niet Mannoe: " + bubble);
+    const written = await pg.evaluate(() => {
+      const texts = [];
+      document.querySelectorAll("body, body *").forEach((el) => {
+        if (el.childNodes && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) {
+          texts.push(el.textContent);
+        }
+      });
+      return texts.join("\n");
+    });
+    ok(!/Mannoe/.test(written), "geen Mannoe in zichtbare schermtekst");
     await shot(pg, "piet_intro_768x1024.png");
     await pg.close();
   }
