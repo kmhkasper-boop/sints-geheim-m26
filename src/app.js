@@ -400,35 +400,63 @@
   }
 
   /* ---------- sint ---------- */
+  function hasSintVideo() {
+    const vid = $("#sint-video");
+    return !!(vid && vid.getAttribute("data-has") !== "0");
+  }
+
+  function hideSintPlayFallback() {
+    const btn = $("#btn-sint-play");
+    if (btn) btn.hidden = true;
+  }
+
+  function showSintPlayFallback() {
+    const btn = $("#btn-sint-play");
+    if (btn) btn.hidden = false;
+  }
+
+  function playSintVideo() {
+    const vid = $("#sint-video");
+    const img = $("#sint-still");
+    if (!vid) return;
+    stopAudio();
+    hideSintPlayFallback();
+    vid.style.display = "block";
+    if (img) img.style.display = "none";
+    vid.muted = false;
+    vid.defaultMuted = false;
+    vid.playsInline = true;
+    vid.setAttribute("playsinline", "");
+    vid.setAttribute("webkit-playsinline", "");
+    try { if (vid.currentTime > 0.05) vid.currentTime = 0; } catch (e) {}
+    const p = vid.play();
+    if (p && p.catch) {
+      p.then(hideSintPlayFallback).catch(function () {
+        showSintPlayFallback();
+      });
+    }
+    setTimeout(function () {
+      if (vid.paused && !vid.ended) showSintPlayFallback();
+    }, 500);
+  }
+
   function openSint() {
     show("sint");
     const vid = $("#sint-video");
     const img = $("#sint-still");
-    const hasVid = vid && vid.getAttribute("data-has") === "1";
-    if (hasVid) {
-      vid.style.display = "block";
-      if (img) img.style.display = "none";
-      vid.currentTime = 0;
-      const p = vid.play();
-      if (p) p.catch(function () {
-        // iOS might need muted then unmute — we already unlocked from a tap
-        vid.muted = false;
-        vid.play().catch(function () {});
-      });
+    if (hasSintVideo()) {
+      playSintVideo();
     } else {
       if (vid) vid.style.display = "none";
       if (img) { img.style.display = "block"; img.classList.add("talking"); }
+      hideSintPlayFallback();
+      play("sint");
     }
-    play("sint");
   }
 
   function replaySint() {
-    play("sint");
-    const vid = $("#sint-video");
-    if (vid && vid.getAttribute("data-has") === "1") {
-      vid.currentTime = 0;
-      vid.play().catch(function () {});
-    }
+    if (hasSintVideo()) playSintVideo();
+    else play("sint");
   }
 
   /* ---------- piet helpers ---------- */
@@ -989,8 +1017,9 @@
 
       '<section class="screen" id="screen-sint">' +
         '<div class="video-wrap" id="sint-wrap">' +
-          '<video id="sint-video" playsinline webkit-playsinline data-has="0"></video>' +
+          '<video id="sint-video" playsinline webkit-playsinline preload="auto" data-has="1"></video>' +
           '<img id="sint-still" src="assets/images/sint-portrait.jpg" alt="Sinterklaas">' +
+          '<button type="button" class="btn big sint-play-btn" id="btn-sint-play" hidden>Tik om te kijken</button>' +
         '</div>' +
         '<div class="row">' +
           '<button class="btn ghost" id="btn-nog-eens">Nog een keer</button>' +
@@ -1069,6 +1098,7 @@
           '<button class="btn" id="btn-print">Printen</button>' +
         '</div>' +
         '<a class="btn big green" id="btn-pietenspel" href="spel/">🎮 Pieten spel</a>' +
+        '<button type="button" class="btn-opnieuw" id="btn-opnieuw-oorkonde">opnieuw beginnen</button>' +
       '</section>' +
 
       '</div>';
@@ -1092,11 +1122,16 @@
       pad.appendChild(b);
     });
 
-    $("#btn-start").onclick = async function () {
-      await unlockAudio();
+    // play() must stay inside the tap (no await) so iOS treats it as a user gesture
+    $("#btn-start").onclick = function () {
+      unlockAudio();
       openSint();
     };
     $("#btn-nog-eens").onclick = function () { replaySint(); };
+    $("#btn-sint-play").onclick = function () {
+      unlockAudio();
+      playSintVideo();
+    };
     $("#btn-verder").onclick = function () {
       const v = $("#sint-video");
       if (v) try { v.pause(); } catch (e) {}
@@ -1112,6 +1147,7 @@
     };
 
     $("#btn-opnieuw").onclick = function () { hardResetForParent(); };
+    $("#btn-opnieuw-oorkonde").onclick = function () { hardResetForParent(); };
 
     // hidden reset: 7 taps on the title (zelfde harde reset)
     $("#start-title").addEventListener("click", function () {
@@ -1123,19 +1159,28 @@
       setTimeout(function () { state.titleTaps = Math.max(0, state.titleTaps - 1); }, 2500);
     });
 
-    // Probe whether the talking video exists
     const vid = $("#sint-video");
+    vid.playsInline = true;
     vid.setAttribute("playsinline", "");
     vid.setAttribute("webkit-playsinline", "");
     vid.preload = "auto";
+    vid.muted = false;
+    vid.defaultMuted = false;
+    vid.setAttribute("data-has", "1");
     vid.src = "assets/video/sint.mp4";
     vid.addEventListener("loadeddata", function () {
       vid.setAttribute("data-has", "1");
-      $("#sint-still").style.display = "none";
-      vid.style.display = "block";
     });
+    vid.addEventListener("playing", hideSintPlayFallback);
     vid.addEventListener("error", function () {
       vid.setAttribute("data-has", "0");
+      if (state.stage === "sint") {
+        vid.style.display = "none";
+        const img = $("#sint-still");
+        if (img) { img.style.display = "block"; img.classList.add("talking"); }
+        hideSintPlayFallback();
+        if (!audio.current) play("sint");
+      }
     });
 
     initAudioBank();
@@ -1153,6 +1198,24 @@
     reset: resetAll,
     strooi: strooi,
     goto: function (s) { state.stage = s; render(); },
+    mediaSnapshot: function () {
+      const vid = document.getElementById("sint-video");
+      const playingAudio = Object.keys(audio.els).filter(function (k) {
+        const a = audio.els[k];
+        return !!(a && !a.paused && !a.ended && a.currentTime > 0);
+      });
+      return {
+        video: vid ? {
+          paused: vid.paused,
+          ended: vid.ended,
+          currentTime: vid.currentTime,
+          width: vid.videoWidth,
+          height: vid.videoHeight,
+          muted: vid.muted,
+        } : null,
+        playingAudio: playingAudio,
+      };
+    },
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", build);

@@ -21,7 +21,7 @@ Printbaar briefje om aan de zak te hangen:
 
 Hulp voor ouders als Manu de code niet ziet: houd Piet **3 seconden** ingedrukt op het codescherm. Dan gaat «Gevonden!» vast open.
 
-Opnieuw beginnen (handig bij testen): op het startscherm staat een klein **opnieuw beginnen**. Na bevestiging wordt de voortgang gewist, de oude cache/service worker opgeruimd, en laadt de nieuwste versie. Tikken **7 keer** op de titel doet hetzelfde.
+Opnieuw beginnen (handig bij testen): op het startscherm en op de oorkonde staat een klein **opnieuw beginnen**. Na bevestiging wordt de voortgang gewist, de oude cache/service worker opgeruimd, en laadt de nieuwste versie. Tikken **7 keer** op de titel op het startscherm doet hetzelfde.
 
 ## QR-code
 

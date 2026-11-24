@@ -159,6 +159,16 @@ h2 { font-size: clamp(1.2rem, 3.6vw, 1.8rem); color: var(--gold); }
 }
 .video-wrap.talking img { animation: pulse 2.8s ease-in-out infinite; }
 @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.015)} }
+.sint-play-btn {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  min-width: 220px;
+}
+.sint-play-btn[hidden] { display: none; }
+.sint-play-btn:active { transform: translate(-50%, -50%) translateY(2px); }
 
 /* Piet */
 .piet-stage {

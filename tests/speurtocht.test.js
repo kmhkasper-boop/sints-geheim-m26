@@ -100,12 +100,19 @@ const LAYOUTS = [
     ok(await pg.locator("#btn-nog-eens").isVisible(), "knop Nog een keer");
     ok(await pg.locator("#btn-verder").isVisible(), "knop Verder");
     await shot(pg, "sint_768x1024.png");
-    // media starts after tap
+    // media starts after tap: only the video, not also sint-rijm.mp3
     const playing = await pg.evaluate(() => {
-      const a = window.__SINT__;
       return !!(document.getElementById("sint-video") || document.getElementById("sint-still"));
     });
     ok(playing, "sint media aanwezig");
+    await pg.waitForFunction(() => {
+      const s = window.__SINT__ && window.__SINT__.mediaSnapshot && window.__SINT__.mediaSnapshot();
+      return s && s.video && s.video.currentTime > 0.2 && s.video.width > 0;
+    }, { timeout: 8000 }).catch(() => {});
+    const snap = await pg.evaluate(() => window.__SINT__.mediaSnapshot());
+    ok(snap && snap.video && snap.video.currentTime > 0.2, "video loopt (t=" + (snap && snap.video && snap.video.currentTime) + ")");
+    ok(snap && snap.video && snap.video.width > 0 && snap.video.height > 0, "video heeft beeld " + (snap && snap.video && snap.video.width) + "x" + (snap && snap.video && snap.video.height));
+    ok(snap && snap.playingAudio.filter((id) => id === "sint").length === 0, "geen tweede audiospoor (sint-rijm): " + (snap && snap.playingAudio));
     await verderNaSint(pg);
     const bubble = await pg.locator("#piet-bubble").textContent();
     ok(/foto/i.test(bubble), "Piet vraagt om een foto: " + bubble);
@@ -216,6 +223,19 @@ const LAYOUTS = [
     await pg.waitForTimeout(400);
     const st = await pg.evaluate(() => window.__SINT__.getState().stage);
     ok(st === "oorkonde", "na herladen nog op oorkonde, stage=" + st);
+    ok(await pg.locator("#btn-pietenspel").isVisible(), "Pieten-spelknop blijft op oorkonde");
+    ok(await pg.locator("#btn-opnieuw-oorkonde").isVisible(), "opnieuw-knop zichtbaar op oorkonde na herladen");
+    const oorkondeConfirm = await pg.evaluate(() => {
+      const orig = window.confirm;
+      let msg = "";
+      window.confirm = function (m) { msg = String(m || ""); return false; };
+      document.getElementById("btn-opnieuw-oorkonde").click();
+      window.confirm = orig;
+      return msg;
+    });
+    ok(/opnieuw|wist|voortgang|nieuwste/i.test(oorkondeConfirm), "oorkonde-reset vraagt bevestiging: " + oorkondeConfirm);
+    const stAfterCancel = await pg.evaluate(() => window.__SINT__.getState().stage);
+    ok(stAfterCancel === "oorkonde", "annuleren blijft op oorkonde, stage=" + stAfterCancel);
     await pg.close();
   }
 
@@ -241,6 +261,50 @@ const LAYOUTS = [
     ok(/opnieuw|wist|voortgang|nieuwste/i.test(confirmed), "reset vraagt bevestiging: " + confirmed);
     ok(await pg.locator("#btn-start").isVisible(), "annuleren blijft op start");
     await pg.close();
+  }
+
+  console.log("▶ WebKit iPhone: video speelt, één audiospoor");
+  {
+    const { webkit, devices } = require("playwright-core");
+    const device = devices["iPhone 13"] || devices["iPhone 12"];
+    const wk = await webkit.launch({ args: [] });
+    const ctx = await wk.newContext({
+      ...device,
+      locale: "nl-NL",
+    });
+    const pg = await ctx.newPage();
+    const wkErrs = [];
+    pg.on("pageerror", (e) => wkErrs.push(e.message));
+    await pg.goto(URL0, { waitUntil: "networkidle" });
+    await pg.waitForSelector("#btn-start");
+    await pg.click("#btn-start");
+    await pg.waitForSelector("#screen-sint.on");
+    await pg.waitForFunction(() => {
+      const s = window.__SINT__ && window.__SINT__.mediaSnapshot && window.__SINT__.mediaSnapshot();
+      return s && s.video && s.video.currentTime > 0.2 && s.video.width > 0 && s.video.height > 0;
+    }, { timeout: 12000 }).catch(() => {});
+    const snap = await pg.evaluate(() => window.__SINT__.mediaSnapshot());
+    ok(snap && snap.video && snap.video.currentTime > 0.2, "WebKit: video loopt (t=" + (snap && snap.video && snap.video.currentTime) + ")");
+    ok(snap && snap.video && snap.video.width > 0 && snap.video.height > 0, "WebKit: beeld " + (snap && snap.video && (snap.video.width + "x" + snap.video.height)));
+    ok(snap && snap.playingAudio.filter((id) => id === "sint").length === 0, "WebKit: geen dubbele audio " + (snap && JSON.stringify(snap.playingAudio)));
+    // Tap-to-play fallback bestaat
+    ok(await pg.locator("#btn-sint-play").count(), "tik-om-te-kijken knop aanwezig");
+    // Na SW-install: video blijft Range-vriendelijk (SW onderschept .mp4 niet)
+    await pg.waitForTimeout(800);
+    const rangeOk = await pg.evaluate(async () => {
+      const url = new URL("assets/video/sint.mp4", location.href).href;
+      const res = await fetch(url, { headers: { Range: "bytes=0-1023" } });
+      return { status: res.status, cr: res.headers.get("Content-Range") || "", cl: res.headers.get("Content-Length") || "" };
+    });
+    ok(rangeOk.status === 206 || rangeOk.status === 200, "video Range-antwoord status " + rangeOk.status + " " + rangeOk.cr);
+    if (rangeOk.status === 206) {
+      ok(/bytes 0-1023\//.test(rangeOk.cr) || /bytes 0-/.test(rangeOk.cr), "Content-Range: " + rangeOk.cr);
+    }
+    await shot(pg, "sint_webkit_iphone.png");
+    await pg.close();
+    await ctx.close();
+    await wk.close();
+    ok(wkErrs.filter((e) => !/favicon|serviceWorker|AbortError|sw\.js load failed/i.test(e)).length === 0, "WebKit geen page errors: " + wkErrs.slice(0, 3).join(" | "));
   }
 
   console.log("▶ page errors");

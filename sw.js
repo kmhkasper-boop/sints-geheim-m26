@@ -1,5 +1,5 @@
 /* Speurtocht service worker – gegenereerd door tools/build.js. Alleen eigen bestanden, geen externe verzoeken. */
-const VERSION = "vf51df8da69";
+const VERSION = "v7c9459c954";
 const CACHE = "sint-speurtocht-" + VERSION;
 const FILES = [
  "./",
@@ -163,6 +163,10 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
+  // iOS Safari needs real Range/206 responses for <video>. A SW-cached
+  // 200 without Content-Range often yields audio-only or a black frame.
+  // Let the browser talk to the network (or HTTP cache) for video.
+  if (req.destination === "video" || url.pathname.toLowerCase().endsWith(".mp4")) return;
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
