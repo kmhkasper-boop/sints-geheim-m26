@@ -121,6 +121,105 @@
     show("start");
   }
 
+  var swUpdatePending = false;
+  var swReloadOnce = false;
+
+  function midVideoNow() {
+    if (state.stage === "sint" || state.stage === "gevonden") return true;
+    try {
+      const v = document.getElementById("sint-video");
+      if (v && !v.paused && !v.ended && v.currentTime > 0) return true;
+    } catch (e) {}
+    return false;
+  }
+
+  function maybeReloadForSw() {
+    if (!swUpdatePending || swReloadOnce) return;
+    if (midVideoNow()) return;
+    if (state.stage && state.stage !== "start") return;
+    swReloadOnce = true;
+    try { sessionStorage.setItem("sint_sw_reloaded", "1"); } catch (e) {}
+    location.reload();
+  }
+
+  function hardResetForParent() {
+    const msg = "Opnieuw beginnen? Dit wist de voortgang op dit apparaat en laadt de nieuwste versie van de speurtocht.";
+    if (!window.confirm(msg)) return;
+    stopCam();
+    stopAudio();
+    try { localStorage.removeItem(C.storageKey); } catch (e) {}
+    function go() {
+      try {
+        const u = new URL(location.href);
+        u.searchParams.set("r", String(Date.now()));
+        location.replace(u.href);
+      } catch (e2) {
+        location.reload();
+      }
+    }
+    const jobs = [];
+    if ("serviceWorker" in navigator) {
+      jobs.push(
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          return Promise.all(regs.map(function (r) { return r.unregister(); }));
+        })
+      );
+    }
+    if (window.caches && caches.keys) {
+      jobs.push(
+        caches.keys().then(function (keys) {
+          return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+        })
+      );
+    }
+    Promise.all(jobs).then(go, go);
+  }
+
+  function initServiceWorker() {
+    if (!("serviceWorker" in navigator)) return;
+    try {
+      if (sessionStorage.getItem("sint_sw_reloaded")) {
+        sessionStorage.removeItem("sint_sw_reloaded");
+      }
+    } catch (e) {}
+    var hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (!hadController) {
+        hadController = true;
+        return;
+      }
+      swUpdatePending = true;
+      maybeReloadForSw();
+    });
+    navigator.serviceWorker
+      .register("sw.js", { updateViaCache: "none" })
+      .then(function (reg) {
+        try { reg.update(); } catch (e) {}
+        if (reg.waiting && hadController) {
+          swUpdatePending = true;
+          maybeReloadForSw();
+        }
+        reg.addEventListener("updatefound", function () {
+          const inst = reg.installing;
+          if (!inst) return;
+          inst.addEventListener("statechange", function () {
+            if (inst.state === "activated" && hadController) {
+              swUpdatePending = true;
+              maybeReloadForSw();
+            }
+          });
+        });
+      })
+      .catch(function () {});
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState !== "visible" || state.stage !== "start") return;
+      navigator.serviceWorker.getRegistration("sw.js").then(function (reg) {
+        if (reg) try { reg.update(); } catch (e) {}
+      });
+      maybeReloadForSw();
+    });
+  }
+
   /* ---------- audio ---------- */
   function premake(src, id) {
     const a = new Audio(src);
@@ -276,6 +375,7 @@
     state.stage = name;
     $$(".screen").forEach((s) => s.classList.toggle("on", s.id === "screen-" + name));
     saveState();
+    if (name === "start") maybeReloadForSw();
   }
 
   function render() {
@@ -884,6 +984,7 @@
         '<div class="start-hero"><img src="assets/images/sint-portrait.jpg" alt="Sinterklaas"></div>' +
         '<p class="sub">Tik om te beginnen</p>' +
         '<button class="btn big" id="btn-start">Start!</button>' +
+        '<button type="button" class="btn-opnieuw" id="btn-opnieuw">opnieuw beginnen</button>' +
       '</section>' +
 
       '<section class="screen" id="screen-sint">' +
@@ -1010,12 +1111,14 @@
       openOorkonde();
     };
 
-    // hidden reset: 7 taps on the title
+    $("#btn-opnieuw").onclick = function () { hardResetForParent(); };
+
+    // hidden reset: 7 taps on the title (zelfde harde reset)
     $("#start-title").addEventListener("click", function () {
       state.titleTaps += 1;
       if (state.titleTaps >= 7) {
         state.titleTaps = 0;
-        if (window.confirm("Opnieuw beginnen?")) resetAll();
+        hardResetForParent();
       }
       setTimeout(function () { state.titleTaps = Math.max(0, state.titleTaps - 1); }, 2500);
     });
@@ -1041,10 +1144,7 @@
     else show("start");
     updateCounter();
 
-    // SW
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js").catch(function () {});
-    }
+    initServiceWorker();
   }
 
   // expose a tiny test hook (no data leaves the device)

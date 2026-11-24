@@ -21,12 +21,16 @@ Printbaar briefje om aan de zak te hangen:
 
 Hulp voor ouders als Manu de code niet ziet: houd Piet **3 seconden** ingedrukt op het codescherm. Dan gaat «Gevonden!» vast open.
 
-Opnieuw beginnen: tik **7 keer** op de titel op het startscherm.
+Opnieuw beginnen (handig bij testen): op het startscherm staat een klein **opnieuw beginnen**. Na bevestiging wordt de voortgang gewist, de oude cache/service worker opgeruimd, en laadt de nieuwste versie. Tikken **7 keer** op de titel doet hetzelfde.
 
 ## QR-code
 
-- `print/qr-klein.png` — klein, voor op het kadootje
-- `print/qr-a6.png` — A6 om te printen
+Printbare Sinterklaas-kaartjes (300 dpi) met de QR naar de speurtocht:
+
+- `print/qr-kaart-a6.png` — A6 (105 × 148 mm)
+- `print/qr-kadokaartje.png` — klein kadokaartje (60 × 90 mm)
+
+(Oudere kale QR-jes blijven staan als `print/qr-a6.png` en `print/qr-klein.png`.)
 
 ## Hoe het loopt
 

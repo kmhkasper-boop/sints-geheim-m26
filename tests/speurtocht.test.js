@@ -229,6 +229,17 @@ const LAYOUTS = [
     // hidden reset bestaat
     await pg.click("#start-title");
     ok(true, "titel is tappable voor reset");
+    ok(await pg.locator("#btn-opnieuw").isVisible(), "kleine opnieuw-knop op startscherm");
+    const confirmed = await pg.evaluate(() => {
+      const orig = window.confirm;
+      let msg = "";
+      window.confirm = function (m) { msg = String(m || ""); return false; };
+      document.getElementById("btn-opnieuw").click();
+      window.confirm = orig;
+      return msg;
+    });
+    ok(/opnieuw|wist|voortgang|nieuwste/i.test(confirmed), "reset vraagt bevestiging: " + confirmed);
+    ok(await pg.locator("#btn-start").isVisible(), "annuleren blijft op start");
     await pg.close();
   }
 

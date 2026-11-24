@@ -1,5 +1,5 @@
 /* Speurtocht service worker – gegenereerd door tools/build.js. Alleen eigen bestanden, geen externe verzoeken. */
-const VERSION = "v1d44ce780f";
+const VERSION = "v99891147b9";
 const CACHE = "sint-speurtocht-" + VERSION;
 const FILES = [
  "./",
