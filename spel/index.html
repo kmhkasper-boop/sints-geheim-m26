@@ -2,13 +2,17 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#14204a">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pieten spel">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#0c1433">
+  <link rel="manifest" href="manifest.webmanifest">
   <title>Pieten spel</title>
   <link rel="icon" type="image/png" sizes="48x48" href="../icons/favicon-48.png">
-  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="stylesheet" href="spel.css">
 </head>
 <body>
@@ -39,6 +43,8 @@
 
   <div id="banner" class="hidden"></div>
 
+  <div id="rotate" class="hidden"><div class="rot-phone">📱</div><div class="rot-txt">Draai je telefoon</div></div>
+
   <!-- menu -->
   <section class="screen" id="scr-menu">
     <img class="menu-piet" src="assets/piet-blij.webp" alt="">
@@ -48,6 +54,7 @@
       <button class="btn ghost small" id="btn-geluid">🔊</button>
       <a class="btn ghost small" id="btn-terug" href="../">◀ Speurtocht</a>
     </div>
+    <div class="ios-tip hidden" id="ios-tip"><img src="icons/apple-touch-icon.png" alt=""> <svg viewBox="0 0 24 24" width="22" height="22" aria-label="deel"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 11v9h14v-9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> → Zet op beginscherm</div>
   </section>
 
   <!-- pause -->

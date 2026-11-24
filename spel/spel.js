@@ -29,16 +29,59 @@
   /* ---------- canvas ---------- */
   const cv = $("#game"), ctx = cv.getContext("2d");
   let W = 0, H = 0, DPR = 1, SC = 1, VW = 0, camX = 0, camY = 0, bottomPad = 0, portrait = false;
+  // Maat altijd uit de layout-viewport (niet uit een ingezoomde visual viewport), zodat schaal nooit opstapelt.
+  function viewSize() {
+    const de = document.documentElement;
+    let w = de.clientWidth || window.innerWidth, h = de.clientHeight || window.innerHeight;
+    const vv = window.visualViewport;
+    if (vv && Math.abs(vv.scale - 1) < 0.02) { w = vv.width; h = vv.height; }
+    return [Math.max(1, Math.round(w)), Math.max(1, Math.round(h))];
+  }
   function resize() {
-    W = window.innerWidth; H = window.innerHeight; DPR = Math.min(2, window.devicePixelRatio || 1);
-    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    const sz = viewSize(); W = sz[0]; H = sz[1];
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    const bw = Math.round(W * DPR), bh = Math.round(H * DPR);
+    if (cv.width !== bw) cv.width = bw;
+    if (cv.height !== bh) cv.height = bh;
+    cv.style.width = W + "px"; cv.style.height = H + "px";
+    document.documentElement.style.setProperty("--vh", H + "px");
     portrait = H > W * 1.05;
     bottomPad = portrait ? Math.min(240, H * 0.22) : 0;
     SC = Math.min((H - bottomPad) / WORLD_H, W / 720);
     if (!portrait) SC = Math.min(H / WORLD_H, W / 640);
     VW = W / SC;
+    try { checkRotate(); } catch (e) { /* nog niet klaar */ }
   }
-  window.addEventListener("resize", resize); resize();
+  const metaVp = document.querySelector('meta[name="viewport"]');
+  const VP = metaVp ? metaVp.content : "";
+  function resetZoom() {
+    // iOS: viewport-meta opnieuw zetten dwingt schaal 1 af na draaien
+    if (metaVp) { metaVp.content = VP + ", minimum-scale=1"; setTimeout(() => { metaVp.content = VP; }, 50); }
+    if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
+  }
+  let rzT = 0;
+  function resizeSoon() { resize(); clearTimeout(rzT); rzT = setTimeout(resize, 250); setTimeout(resize, 700); }
+  window.addEventListener("resize", resizeSoon);
+  window.addEventListener("orientationchange", () => { resetZoom(); resizeSoon(); });
+  if (window.visualViewport) window.visualViewport.addEventListener("resize", () => { if (Math.abs(window.visualViewport.scale - 1) > 0.02) resetZoom(); resizeSoon(); });
+  if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener("change", resizeSoon);
+  document.addEventListener("fullscreenchange", resizeSoon);
+  window.addEventListener("scroll", () => { if (window.scrollX || window.scrollY) window.scrollTo(0, 0); });
+
+  /* ---------- geen zoom / gebaren ---------- */
+  const noDef = (e) => { if (e.cancelable) e.preventDefault(); };
+  ["gesturestart", "gesturechange", "gestureend"].forEach((ev) => document.addEventListener(ev, noDef, { passive: false }));
+  document.addEventListener("dblclick", noDef, { passive: false });
+  document.addEventListener("touchmove", noDef, { passive: false });
+  document.addEventListener("touchstart", (e) => { if (e.touches.length > 1 && !(e.target.closest && e.target.closest("button,a"))) noDef(e); }, { passive: false });
+  let lastTouchEnd = 0;
+  document.addEventListener("touchend", (e) => {
+    const now = Date.now();
+    if (now - lastTouchEnd < 350 && !(e.target.closest && e.target.closest("button,a,video"))) noDef(e);
+    lastTouchEnd = now;
+  }, { passive: false });
+  document.addEventListener("wheel", (e) => { if (e.ctrlKey) noDef(e); }, { passive: false });
+  resize();
 
   /* ---------- invoer ---------- */
   const inp = { l: false, r: false, jump: false, jumpHeld: false, gooi: false, pep: false };
@@ -632,9 +675,36 @@
   if (isTouch) $("#btn-keys").classList.add("hidden");
 
   function showScreen(id) {
+    setTimeout(checkRotate, 0);
     document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("on", s.id === id));
     if (id) { $("#hud").classList.add("hidden"); $("#touch").classList.add("hidden"); showKeys(false); }
   }
+  /* ---------- volledig scherm, liggend ---------- */
+  const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const standalone = !!navigator.standalone || matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches;
+  function lockLandscape() { try { const o = screen.orientation; if (o && o.lock) o.lock("landscape").catch(() => {}); } catch (e) {} }
+  function goFull() {
+    if (!isTouch) return;
+    const de = document.documentElement;
+    const req = de.requestFullscreen || de.webkitRequestFullscreen;
+    const inFull = document.fullscreenElement || document.webkitFullscreenElement;
+    if (!inFull && req && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
+      try { const pr = req.call(de, { navigationUI: "hide" }); if (pr && pr.then) pr.then(lockLandscape, () => {}); else lockLandscape(); } catch (e) {}
+    } else lockLandscape();
+  }
+  if (isIOS && !standalone) $("#ios-tip").classList.remove("hidden");
+  /* ---------- draai-je-telefoon ---------- */
+  const CALLMODES = ["ring", "call", "ended"];
+  let rotPaused = false;
+  function checkRotate() {
+    const need = isTouch && portrait && !CALLMODES.includes(mode);
+    $("#rotate").classList.toggle("hidden", !need);
+    if (need && mode === "play") { pause(); rotPaused = true; }
+    if (!need && rotPaused && mode === "pause") { rotPaused = false; resume(); }
+    if (!need) rotPaused = false;
+  }
+  checkRotate();
+
   function menu() {
     mode = "menu"; A.stopMusic();
     const box = $("#levels"); box.innerHTML = "";
@@ -645,7 +715,7 @@
       b.dataset.level = i + 1;
       const st = save.stars[i] || 0;
       b.innerHTML = (locked ? "🔒" : String(i + 1)) + '<span class="st">' + (locked ? "" : "★".repeat(st) + "☆".repeat(3 - st)) + "</span>";
-      b.onclick = () => { if (locked) { A.sfx("tik"); return; } A.ensure(); A.loadVoice(VOICES); startLevel(i); };
+      b.onclick = () => { if (locked) { A.sfx("tik"); return; } goFull(); A.ensure(); A.loadVoice(VOICES); startLevel(i); };
       box.appendChild(b);
     }
     $("#btn-geluid").textContent = save.music !== false ? "🔊" : "🔇";
@@ -749,10 +819,11 @@
     if (qs.has("level")) { const n = Math.max(1, Math.min(3, parseInt(qs.get("level"), 10) || 1)); if (DEBUG) startLevel(n - 1); }
   });
   requestAnimationFrame(frame);
+  if ("serviceWorker" in navigator && location.protocol !== "file:") navigator.serviceWorker.register("../sw.js", { scope: "../", updateViaCache: "none" }).catch(() => {});
 
   if (DEBUG) window.PS = {
     start: (n) => startLevel(n - 1), win: winLevel, god: (v) => { god = v; },
-    state: () => ({ mode, level: levelIndex + 1, x: P && P.x, y: P && P.y, on: P && P.on, delivered, chims: chims.length, hearts, pep: pepCount, save: Object.assign({}, save), camX, dead: P && !!P.dead }),
+    state: () => ({ mode, level: levelIndex + 1, x: P && P.x, y: P && P.y, on: P && P.on, delivered, chims: chims.length, hearts, pep: pepCount, save: Object.assign({}, save), camX, W, H, SC, DPR, portrait, cvW: cv.width, cvH: cv.height, dead: P && !!P.dead }),
     input: inp, keys, teleport: (col, row) => { P.x = col * T + 5; P.y = (row + 1) * T - P.h; P.vx = 0; P.vy = 0; },
     level: () => LV, chimneys: () => chims, menu, openSint,
     world: () => ({ P, plats, ents, chims, LV, puffs, shots, T, mode }), solidAt: (c, r) => solidAt(c, r), cell: (c, r) => cell(c, r),

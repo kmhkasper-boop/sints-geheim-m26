@@ -22,6 +22,13 @@ const LAYOUTS = [[1024, 768], [768, 1024], [800, 1280]];
     ok(await p.isVisible("#scr-menu"), tag + " menu zichtbaar");
     ok((await p.$$(".lvl.locked")).length === 2, tag + " level 2 en 3 op slot");
     await p.screenshot({ path: `${SHOTS}/menu_${tag}.png` });
+    if (vp[0] < vp[1]) {
+      // staande tablet: spel is liggend → draai-overlay, daarna liggend verder testen
+      ok(await p.isVisible("#rotate"), tag + " draai-overlay in staand");
+      await p.screenshot({ path: `${SHOTS}/draai_${tag}.png` });
+      await p.setViewportSize({ width: vp[1], height: vp[0] }); await p.waitForTimeout(800);
+      ok(!(await p.isVisible("#rotate")), tag + " overlay weg na draaien");
+    }
     for (const n of [1, 2, 3]) {
       await p.evaluate((n) => PS.start(n), n); await p.waitForTimeout(2200);
       const s = await p.evaluate(() => PS.state());

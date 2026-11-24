@@ -1,5 +1,5 @@
 /* Speurtocht service worker – gegenereerd door tools/build.js. Alleen eigen bestanden, geen externe verzoeken. */
-const VERSION = "v99891147b9";
+const VERSION = "vf51df8da69";
 const CACHE = "sint-speurtocht-" + VERSION;
 const FILES = [
  "./",
@@ -118,8 +118,13 @@ const FILES = [
  "./spel/assets/sint-rond.webp",
  "./spel/assets/zak.webp",
  "./spel/audio.js",
+ "./spel/icons/apple-touch-icon.png",
+ "./spel/icons/icon-192.png",
+ "./spel/icons/icon-512.png",
+ "./spel/icons/icon-maskable-512.png",
  "./spel/index.html",
  "./spel/levels.js",
+ "./spel/manifest.webmanifest",
  "./spel/spel.css",
  "./spel/spel.js",
  "./spel/video/sint-belt.mp4",
