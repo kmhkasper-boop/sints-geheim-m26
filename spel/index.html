@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#14204a">
+  <title>Pieten spel</title>
+  <link rel="icon" type="image/png" sizes="48x48" href="../icons/favicon-48.png">
+  <link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="spel.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="hud" class="hidden">
+    <div class="hud-left"><span id="hud-hearts"></span></div>
+    <div class="hud-mid"><span class="hud-chip"><img src="assets/pakje-rood.webp" alt=""><b id="hud-pakjes">0/0</b></span><span class="hud-chip"><img src="assets/pepernoot.webp" alt=""><b id="hud-pep">0</b></span></div>
+    <div class="hud-right"><button class="icon-btn" id="btn-keys" aria-label="toetsen">⌨️</button><button class="icon-btn" id="btn-pause" aria-label="pauze">⏸</button></div>
+  </div>
+
+  <div id="touch" class="hidden">
+    <div id="pad"><div class="pad-btn" id="pad-l">◀</div><div class="pad-btn" id="pad-r">▶</div></div>
+    <div id="acts">
+      <div class="act-btn small" id="act-pep"><img src="assets/pepernoot.webp" alt="pepernoot"></div>
+      <div class="act-btn" id="act-gooi"><img src="assets/pakje-blauw.webp" alt="gooi"></div>
+      <div class="act-btn big" id="act-jump">⬆</div>
+    </div>
+  </div>
+
+  <div id="keyguide" class="hidden">
+    <div><kbd>A</kbd><kbd>D</kbd> <kbd>◀</kbd><kbd>▶</kbd> lopen</div>
+    <div><kbd>Spatie</kbd> <kbd>W</kbd> <kbd>▲</kbd> springen</div>
+    <div><kbd>E</kbd> <kbd>X</kbd> <img src="assets/pakje-rood.webp" alt=""> gooien</div>
+    <div><kbd>Q</kbd> <kbd>C</kbd> <img src="assets/pepernoot.webp" alt=""> strooien</div>
+    <div><kbd>P</kbd> pauze</div>
+  </div>
+
+  <div id="banner" class="hidden"></div>
+
+  <!-- menu -->
+  <section class="screen" id="scr-menu">
+    <img class="menu-piet" src="assets/piet-blij.webp" alt="">
+    <h1 id="menu-title">Pieten spel</h1>
+    <div class="levels" id="levels"></div>
+    <div class="menu-row">
+      <button class="btn ghost small" id="btn-geluid">🔊</button>
+      <a class="btn ghost small" id="btn-terug" href="../">◀ Speurtocht</a>
+    </div>
+  </section>
+
+  <!-- pause -->
+  <section class="screen dim" id="scr-pause">
+    <h2>⏸</h2>
+    <div class="menu-row">
+      <button class="btn big green" id="btn-verder">▶</button>
+      <button class="btn big" id="btn-opnieuw">↻</button>
+      <button class="btn big" id="btn-menu">☰</button>
+    </div>
+  </section>
+
+  <!-- result -->
+  <section class="screen dim" id="scr-result">
+    <h2 id="res-title">Gelukt!</h2>
+    <div class="stars" id="res-stars"></div>
+    <div class="res-row"><span class="hud-chip big"><img src="assets/pakje-rood.webp" alt=""><b id="res-pakjes"></b></span><span class="hud-chip big"><img src="assets/pepernoot.webp" alt=""><b id="res-pep"></b></span></div>
+    <div class="menu-row">
+      <button class="btn big" id="res-opnieuw">↻</button>
+      <button class="btn big" id="res-menu">☰</button>
+      <button class="btn big green" id="res-verder">▶</button>
+    </div>
+  </section>
+
+  <!-- final -->
+  <section class="screen dim" id="scr-final">
+    <img class="menu-piet" src="assets/piet-blij.webp" alt="">
+    <h2>Super Piet!</h2>
+    <div class="stars" id="fin-stars"></div>
+    <div class="menu-row">
+      <button class="btn big" id="fin-menu">☰</button>
+      <a class="btn big green" href="../">🏅</a>
+    </div>
+  </section>
+
+  <!-- interlude: Sint vraagt -->
+  <section class="screen sint" id="scr-sint">
+    <div class="sint-frame"><video id="vid-vraag" playsinline webkit-playsinline preload="auto" poster="assets/sint-poster.webp" src="video/sint-vraag.mp4"></video></div>
+    <p class="sint-q">Mag ik even je moeder bellen?</p>
+    <button class="btn huge green" id="btn-bel">📞 Bel mama</button>
+    <button class="linkbtn" id="btn-slaover">sla over</button>
+  </section>
+
+  <!-- incoming call -->
+  <section class="screen call" id="scr-ring">
+    <div class="call-top">
+      <div class="call-sub">📱 → 👩 mama</div>
+      <div class="avatar ring"><img src="assets/sint-rond.webp" alt="Sinterklaas"></div>
+      <div class="call-name">Sinterklaas</div>
+      <div class="call-sub">belt…</div>
+    </div>
+    <div class="call-actions">
+      <button class="round-btn green" id="btn-opnemen" aria-label="Opnemen">📞</button>
+      <div class="call-label">Opnemen</div>
+    </div>
+  </section>
+
+  <!-- in call -->
+  <section class="screen call incall" id="scr-incall">
+    <video id="vid-belt" playsinline webkit-playsinline preload="auto" poster="assets/sint-poster.webp" src="video/sint-belt.mp4"></video>
+    <div class="incall-top"><div class="call-name">Sinterklaas</div><div class="call-time" id="call-time">00:00</div></div>
+    <div class="incall-bottom"><button class="round-btn red" id="btn-ophangen" aria-label="Ophangen">📞</button></div>
+  </section>
+
+  <!-- ended -->
+  <section class="screen call" id="scr-ended">
+    <div class="call-top">
+      <div class="avatar"><img src="assets/sint-rond.webp" alt="Sinterklaas"></div>
+      <div class="call-name">Sinterklaas</div>
+      <div class="call-end">Verbinding verbroken</div>
+      <div class="call-time" id="call-time-end">00:00</div>
+    </div>
+    <div class="call-actions"><button class="btn big green hidden" id="btn-na-bel">▶</button></div>
+  </section>
+
+  <script src="levels.js"></script>
+  <script src="audio.js"></script>
+  <script src="spel.js"></script>
+</body>
+</html>

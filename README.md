@@ -67,3 +67,10 @@ Piet spreekt via ElevenLabs. Houd in het Pieten spel (`/spel/`) dezelfde stem aa
 - **model_id:** `eleven_v4`
 - **Gesproken naam:** Mannoe (in het script; eventueel IPA `/mɑˈnu/`). Op het scherm blijft de naam **Manu**.
 - **Pepernotenteller:** Piet zegt een afgerond aantal in hele zinnen (Dex, `eleven_v4`), bijvoorbeeld «een stuk of vijftig». Het exacte aantal staat in het tekstballonnetje op het zak-scherm en op de oorkonde. Boven de 999 blijft de bestaande regel «ontzettend veel».
+
+## Pieten spel (`/spel/`)
+Platformspel als extraatje: knop "🎮 Pieten spel" op het oorkondescherm, of direct `spel/`.
+3 levels (1 kort/makkelijk, 2 makkelijk, 3 pittig met vlaggen-checkpoints). Touch + toetsen (pijltjes/WASD, spatie = springen, E/X = gooien).
+Na level 1 een eenmalig "Sint belt mama"-tussenstuk (video `spel/video/sint-belt.mp4`; Maarten-TTS -8%/-6Hz + HeyGen Avatar 6 Turbo).
+Voortgang in localStorage `pieten_spel_v1`. Ouder-reset: tik 7× op de titel "Pieten spel" in het menu (zet ook het belletje weer aan).
+Test: `node tests/pietenspel.test.js http://127.0.0.1:8777/`. Debug: `spel/?debug=1` (N = level winnen, I = onkwetsbaar).

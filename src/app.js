@@ -962,6 +962,7 @@
           '<button class="btn" id="btn-download">Bewaren</button>' +
           '<button class="btn" id="btn-print">Printen</button>' +
         '</div>' +
+        '<a class="btn big green" id="btn-pietenspel" href="spel/">🎮 Pieten spel</a>' +
       '</section>' +
 
       '</div>';
