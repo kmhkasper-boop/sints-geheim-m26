@@ -3,3 +3,4 @@
 assets/video/*-raw.mp4
 screenshots/
 node_modules/
+tools/__pycache__/
