@@ -1,5 +1,5 @@
 /* Speurtocht service worker – gegenereerd door tools/build.js. Alleen eigen bestanden, geen externe verzoeken. */
-const VERSION = "v7c9459c954";
+const VERSION = "v6adee701d0";
 const CACHE = "sint-speurtocht-" + VERSION;
 const FILES = [
  "./",
@@ -50,6 +50,7 @@ const FILES = [
  "./assets/audio/piet-pep-paar.mp3",
  "./assets/audio/piet-pep_veel.mp3",
  "./assets/audio/piet-tap.mp3",
+ "./assets/audio/piet-uitleg.mp3",
  "./assets/audio/piet-wrong.mp3",
  "./assets/audio/sint-rijm.mp3",
  "./assets/audio/stil.mp3",

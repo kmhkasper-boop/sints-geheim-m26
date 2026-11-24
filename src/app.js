@@ -6,7 +6,8 @@
   const $$ = (sel, el) => Array.from((el || document).querySelectorAll(sel));
 
   const PIET_TXT = {
-    intro: "Hoi " + C.playerFirst + "! Mag jij een foto maken van de ruimte waar je nu bent?",
+    introExplain: "Hoi " + C.playerFirst + "! Ik ben even vergeten waar ik de zak van Sint heb verstopt. Er zijn zóveel kamers in huis!",
+    intro: "Maak jij een foto van een kamer? Als ik de kamer zie, zeg ik warm of koud!",
     cold: [
       "Brrr, ijskoud! Hier ligt alleen een sok.",
       "Nee hoor, koud als ijs! Hier is de zak vast niet.",
@@ -241,7 +242,7 @@
     premake("assets/audio/hinnik.mp3", "hinnik");
     premake("assets/audio/zak-lied.mp3", "lied");
     [
-      "intro", "cold1", "cold2", "cold3", "again1", "again2",
+      "uitleg", "intro", "cold1", "cold2", "cold3", "again1", "again2",
       "fridge", "hangt", "code", "wrong", "found", "oorkonde",
       "pep_veel", "tap",
     ].forEach((k) => premake("assets/audio/piet-" + k + ".mp3", "piet-" + k));
@@ -467,16 +468,31 @@
     if (b) b.textContent = text;
   }
 
+  var pietIntroStep = 0;
+
+  function showPietFotoAsk() {
+    setPiet("talking", PIET_TXT.intro);
+    $("#piet-actions").innerHTML = '<button class="btn big" id="btn-foto-gaan">Ik maak een foto</button>';
+    $("#btn-foto-gaan").onclick = function () { openCamera("room"); };
+  }
+
   function openPietIntro() {
     stopCam();
     const v = $("#sint-video");
     if (v) try { v.pause(); } catch (e) {}
     stopAudio();
     show("piet");
-    setPiet("talking", PIET_TXT.intro);
-    $("#piet-actions").innerHTML = '<button class="btn big" id="btn-foto-gaan">Ik maak een foto</button>';
-    $("#btn-foto-gaan").onclick = function () { openCamera("room"); };
-    play("piet-intro");
+    pietIntroStep = 1;
+    setPiet("talking", PIET_TXT.introExplain);
+    $("#piet-actions").innerHTML = '<button class="btn big" id="btn-piet-verder">Verder</button>';
+    function goFotoAsk() {
+      if (pietIntroStep !== 1) return;
+      pietIntroStep = 2;
+      showPietFotoAsk();
+      play("piet-intro");
+    }
+    $("#btn-piet-verder").onclick = goFotoAsk;
+    play("piet-uitleg", { onend: goFotoAsk });
   }
 
   function openKoud() {

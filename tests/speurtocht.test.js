@@ -114,9 +114,16 @@ const LAYOUTS = [
     ok(snap && snap.video && snap.video.width > 0 && snap.video.height > 0, "video heeft beeld " + (snap && snap.video && snap.video.width) + "x" + (snap && snap.video && snap.video.height));
     ok(snap && snap.playingAudio.filter((id) => id === "sint").length === 0, "geen tweede audiospoor (sint-rijm): " + (snap && snap.playingAudio));
     await verderNaSint(pg);
+    const bubble1 = await pg.locator("#piet-bubble").textContent();
+    ok(/vergeten|kwijt|zak|kamers/i.test(bubble1), "Piet legt uit over de zak: " + bubble1);
+    ok(/\bManu\b/.test(bubble1) && !/Mannoe/.test(bubble1), "uitleg-bubbel schrijft Manu, niet Mannoe: " + bubble1);
+    ok(await pg.locator("#btn-piet-verder").isVisible(), "Verder-knop na de uitleg");
+    await shot(pg, "piet_uitleg_768x1024.png");
+    await pg.click("#btn-piet-verder");
+    await pg.waitForSelector("#btn-foto-gaan");
     const bubble = await pg.locator("#piet-bubble").textContent();
-    ok(/foto/i.test(bubble), "Piet vraagt om een foto: " + bubble);
-    ok(/\bManu\b/.test(bubble) && !/Mannoe/.test(bubble), "bubbel schrijft Manu, niet Mannoe: " + bubble);
+    ok(/foto/i.test(bubble) && /kamer|ruimte/i.test(bubble), "Piet vraagt om een foto van een kamer: " + bubble);
+    ok(!/Mannoe/.test(bubble), "foto-bubbel schrijft geen Mannoe: " + bubble);
     const written = await pg.evaluate(() => {
       const texts = [];
       document.querySelectorAll("body, body *").forEach((el) => {
@@ -131,11 +138,27 @@ const LAYOUTS = [
     await pg.close();
   }
 
+  console.log("▶ Piet-uitleg op tablet 800x1280");
+  {
+    const pg = await page([800, 1280]);
+    await startGame(pg);
+    await verderNaSint(pg);
+    await pg.waitForSelector("#btn-piet-verder");
+    const bubble = await pg.locator("#piet-bubble").textContent();
+    ok(/\bManu\b/.test(bubble) && !/Mannoe/.test(bubble), "800x1280 uitleg schrijft Manu: " + bubble);
+    ok(/vergeten|zak|kamers/i.test(bubble), "800x1280 uitleg noemt zak/kamers");
+    await shot(pg, "piet_uitleg_800x1280.png");
+    await pg.close();
+  }
+
   console.log("▶ foto's, koud, strooi, koelkast, polaroid, code, oorkonde");
   {
     const pg = await page([800, 1280]);
     await startGame(pg);
     await verderNaSint(pg);
+    if (await pg.locator("#btn-piet-verder").count()) {
+      await pg.click("#btn-piet-verder");
+    }
     await pg.click("#btn-foto-gaan");
     await pg.waitForSelector("#screen-camera.on");
     await shot(pg, "camera_800x1280.png");

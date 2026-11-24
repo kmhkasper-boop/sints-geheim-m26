@@ -36,7 +36,7 @@ Printbare Sinterklaas-kaartjes (300 dpi) met de QR naar de speurtocht:
 
 1. Tik op **Start!** (nodig voor geluid op iPhone/iPad).
 2. Filmpje van Sinterklaas met een kort gedicht (traditie + een bericht voor Manu). **Nog een keer** of **Verder**.
-3. Piet vraagt om een foto van de ruimte. Drie keer zegt hij «koud», met een thermometer. Ondertussen kan Manu **Strooi!** doen: virtuele pepernoten (met teller).
+3. Piet legt kort uit dat hij de zak is vergeten en vraagt om een foto van een kamer. Als hij de kamer ziet, zegt hij «warm» of «koud» (drie keer «koud», met een thermometer). Ondertussen kan Manu **Strooi!** doen: virtuele pepernoten (met teller).
 4. Daarna vraagt Piet om een foto van de **koelkast**. Op die foto vliegt een polaroid van «de plek» met een magneetje. Tik erop voor een grote weergave.
 5. Op de zak hangt het briefje met de code. Die tikt hij in, dan **Gevonden!**
 6. Korte versie van het volksliedje *De zak van Sinterklaas* (eigen arrangement), terwijl de zak op het dak, in de schoorsteen, op de stoomboot en op Amerigo landt. Amerigo hinnikt aan het eind. Piet noemt het aantal gestrooide pepernoten.
