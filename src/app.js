@@ -144,14 +144,14 @@
     [
       "intro", "cold1", "cold2", "cold3", "again1", "again2",
       "fridge", "hangt", "code", "wrong", "found", "oorkonde",
-      "pep_pre", "pep_post", "pep_veel", "tap",
+      "pep_veel", "tap",
     ].forEach((k) => premake("assets/audio/piet-" + k + ".mp3", "piet-" + k));
-    for (let i = 0; i < 100; i++) {
-      premake("assets/audio/numbers/" + String(i).padStart(3, "0") + ".mp3", "n" + i);
-    }
-    [100, 200, 300, 400, 500, 600, 700, 800, 900].forEach((n) => {
-      premake("assets/audio/numbers/" + String(n).padStart(3, "0") + ".mp3", "n" + n);
-    });
+    [
+      "0", "1", "paar", "handjevol",
+      "12", "15", "20", "25", "30", "40", "50", "60", "70", "80", "90", "100",
+      "150", "200", "250", "300", "350", "400", "450", "500",
+      "600", "700", "800", "900", "bijna1000",
+    ].forEach((k) => premake("assets/audio/piet-pep-" + k + ".mp3", "piet-pep-" + k));
   }
 
   async function unlockAudio() {
@@ -232,19 +232,37 @@
     next();
   }
 
-  function speakPepernoten(n, ondone) {
-    if (n > 999) return play("piet-pep_veel", { onend: ondone });
-    const ids = ["piet-pep_pre"];
-    if (n <= 99) {
-      ids.push("n" + n);
-    } else {
-      const h = Math.floor(n / 100) * 100;
-      const rest = n % 100;
-      ids.push("n" + h);
-      if (rest) ids.push("n" + rest);
+  function pepLineId(n) {
+    n = Math.max(0, Math.floor(Number(n) || 0));
+    if (n <= 0) return "piet-pep-0";
+    if (n === 1) return "piet-pep-1";
+    if (n <= 4) return "piet-pep-paar";
+    if (n <= 10) return "piet-pep-handjevol";
+    const buckets = [
+      [13, "12"], [17, "15"], [22, "20"], [27, "25"], [34, "30"],
+      [44, "40"], [54, "50"], [64, "60"], [74, "70"], [84, "80"],
+      [94, "90"], [124, "100"], [174, "150"], [224, "200"],
+      [274, "250"], [324, "300"], [374, "350"], [424, "400"],
+      [474, "450"], [549, "500"], [649, "600"], [749, "700"],
+      [849, "800"], [924, "900"], [999, "bijna1000"],
+    ];
+    for (let i = 0; i < buckets.length; i++) {
+      if (n <= buckets[i][0]) return "piet-pep-" + buckets[i][1];
     }
-    ids.push("piet-pep_post");
-    playChain(ids, ondone);
+    return "piet-pep_veel";
+  }
+
+  function showPepCount(n) {
+    const el = $("#pep-count");
+    if (!el) return;
+    const word = n === 1 ? "pepernoot" : "pepernoten";
+    el.textContent = "🍪 " + n + " " + word;
+    el.hidden = false;
+  }
+
+  function speakPepernoten(n, ondone) {
+    showPepCount(n);
+    play(pepLineId(n), { onend: ondone });
   }
 
   function buzz(pattern) {
@@ -726,6 +744,8 @@
       imgs.forEach((im, n) => im.classList.toggle("on", n === i));
     }, 3500);
     $("#lyrics").textContent = "";
+    const pepEl = $("#pep-count");
+    if (pepEl) { pepEl.hidden = true; pepEl.textContent = ""; }
     $("#btn-naar-oorkonde").style.display = "none";
   }
 
@@ -931,6 +951,7 @@
           '<img data-place="stoomboot" src="assets/images/zak-stoomboot.jpg" alt="zak op de stoomboot">' +
           '<img data-place="paard" src="assets/images/zak-paard.jpg" alt="zak op Amerigo">' +
           '<div class="lyrics" id="lyrics"></div>' +
+          '<div class="pep-count" id="pep-count" hidden></div>' +
         '</div>' +
         '<button class="btn big" id="btn-naar-oorkonde" style="display:none">Naar de oorkonde</button>' +
       '</section>' +

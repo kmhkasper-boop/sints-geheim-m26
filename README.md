@@ -66,3 +66,4 @@ Piet spreekt via ElevenLabs. Houd in het Pieten spel (`/spel/`) dezelfde stem aa
 - **stem:** Dex – Energetic Dutch Commercial, TVHost
 - **model_id:** `eleven_v4`
 - **Gesproken naam:** Mannoe (in het script; eventueel IPA `/mɑˈnu/`). Op het scherm blijft de naam **Manu**.
+- **Pepernotenteller:** Piet zegt een afgerond aantal in hele zinnen (Dex, `eleven_v4`), bijvoorbeeld «een stuk of vijftig». Het exacte aantal staat in het tekstballonnetje op het zak-scherm en op de oorkonde. Boven de 999 blijft de bestaande regel «ontzettend veel».

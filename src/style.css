@@ -351,6 +351,23 @@ h2 { font-size: clamp(1.2rem, 3.6vw, 1.8rem); color: var(--gold); }
   text-shadow: 0 2px 8px #000;
   min-height: 3.2em;
 }
+.pep-count {
+  position: absolute;
+  left: 50%;
+  bottom: calc(18px + var(--safe-b));
+  transform: translateX(-50%);
+  background: rgba(26,8,10,.82);
+  color: var(--gold);
+  border: 2px solid var(--gold);
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-weight: 700;
+  font-size: clamp(1.15rem, 3.4vw, 1.6rem);
+  white-space: nowrap;
+  text-shadow: none;
+  z-index: 2;
+}
+.pep-count[hidden] { display: none; }
 
 /* Oorkonde */
 .oorkonde-wrap {
