@@ -595,9 +595,12 @@
         const scale = Math.max(w / fridge.naturalWidth, h / fridge.naturalHeight);
         const dw = fridge.naturalWidth * scale, dh = fridge.naturalHeight * scale;
         ctx.drawImage(fridge, (w - dw) / 2, (h - dh) / 2, dw, dh);
-        // polaroid
-        const pw = Math.round(w * 0.36), ph = Math.round(pw * 1.15);
-        const px = Math.round(w * 0.5 - pw / 2), py = Math.round(h * 0.38 - ph / 2);
+        // polaroid (portrait, whole door visible)
+        const pad = 12, cap = 36;
+        const innerW = Math.round(w * 0.22);
+        const innerH = Math.round(innerW * 16 / 9);
+        const pw = innerW + pad * 2, ph = innerH + pad + cap;
+        const px = Math.round(w * 0.5 - pw / 2), py = Math.round(h * 0.42 - ph / 2);
         ctx.save();
         ctx.translate(px + pw / 2, py + ph / 2);
         ctx.rotate((-7 * Math.PI) / 180);
@@ -607,13 +610,15 @@
         ctx.fillStyle = "#f7f3ea";
         ctx.fillRect(-pw / 2, -ph / 2, pw, ph);
         ctx.shadowColor = "transparent";
-        const innerW = pw - 20, innerH = Math.round(innerW * 0.75);
-        const ix = -pw / 2 + 10, iy = -ph / 2 + 10;
-        ctx.drawImage(plek, ix, iy, innerW, innerH);
+        const ix = -pw / 2 + pad, iy = -ph / 2 + pad;
+        const iw = plek.naturalWidth || 1, ih = plek.naturalHeight || 1;
+        const fit = Math.min(innerW / iw, innerH / ih);
+        const pdw = iw * fit, pdh = ih * fit;
+        ctx.drawImage(plek, ix + (innerW - pdw) / 2, iy + (innerH - pdh) / 2, pdw, pdh);
         ctx.fillStyle = "#333";
         ctx.font = "20px Fredoka, sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("de plek", 0, ph / 2 - 16);
+        ctx.fillText("de plek", 0, ph / 2 - 14);
         if (mag.naturalWidth) {
           const mw = 70;
           ctx.drawImage(mag, -mw / 2, -ph / 2 - 28, mw, mw);

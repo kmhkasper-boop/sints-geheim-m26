@@ -6,18 +6,9 @@ Een interactieve Sinterklaas-speurtocht voor **Manu** (8), op de tablet. Hij sca
 
 Niets verlaat de tablet: foto’s en voortgang blijven lokaal (geen analytics, geen uploads).
 
-## Voor Lucas: de foto van ‘de plek’
+## De foto van ‘de plek’
 
-1. Maak een duidelijke foto van de zak in de ruimte waar hij écht ligt.
-2. Vervang dit bestand (zelfde naam, graag JPEG):
-
-   `assets/images/de-plek.jpg`
-
-   (Er staat nu een duidelijke placeholder: «hier komt de foto».)
-3. Optioneel hetzelfde doen voor `assets/images/de-plek.webp` (anders is de JPG genoeg; de app gebruikt de JPG).
-4. Daarna: `node tools/build.js` (bumpt de service worker) en opnieuw publiceren.
-
-Zonder die foto werkt het spel al: Manu ziet de placeholder-polaroid en kan de rest afmaken.
+De polaroid toont de echte foto van de plek (witte kastdeur tussen grijze gordijnen) in `assets/images/de-plek.jpg`. Onderschrift: «de plek».
 
 ## Geheime code
 
