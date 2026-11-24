@@ -4,3 +4,5 @@ assets/video/*-raw.mp4
 screenshots/
 node_modules/
 tools/__pycache__/
+
+assets/audio/sint-deel*.mp3
